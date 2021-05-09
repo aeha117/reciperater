@@ -20,4 +20,35 @@ def get_time():
 #
 ## always commit your models to avoid problems later
 
+db.define_table(
+    'recipe',
+    Field('recipe_name', requires=IS_NOT_EMPTY()),
+    Field('recipe_time'),
+    Field('recipe_content', 'text', requires=IS_NOT_EMPTY()),
+    Field('user_email', default=get_user_email),
+    Field('recipe_likes', 'integer', requires=IS_INT_IN_RANGE(0, 1e10)),
+    Field('recipe_dislikes', 'integer', requires=IS_INT_IN_RANGE(0, 1e10)),
+    Field('date_created', 'datetime', default=get_time),
+)
+
+db.define_table(
+    'tags',
+    Field('tag_name', requires=IS_NOT_EMPTY()),
+    Field('recipe_id', 'reference recipe'),
+)
+
+db.define_table(
+    'ingredients',
+    Field('ingredient_name', requires=IS_NOT_EMPTY()),
+    Field('ingredient_amount', 'double'),
+    Field('ingredient_unit'),
+    Field('recipe_id', 'reference recipe'),
+)
+
+db.define_table(
+    'user_bio',
+    Field('bio_content', 'text'),
+    Field('user_email', default=get_user_email),
+)
+
 db.commit()
