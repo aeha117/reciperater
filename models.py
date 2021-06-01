@@ -51,4 +51,21 @@ db.define_table(
     Field('user_email', default=get_user_email),
 )
 
+db.define_table(
+    'comments',
+    Field('comment_content', 'text'),
+    Field('user_email', default=get_user_email),
+    Field('name', requires=IS_NOT_EMPTY()),
+    Field('likers', type='list:string'), 
+    Field('dislikers', type='list:string'),
+)
+
+db.define_table(
+    'replies',
+    Field('comment_id', 'reference comments'),
+    Field('reply_content', 'text'),
+    Field('user_email', default=get_user_email),
+    Field('name', requires=IS_NOT_EMPTY()),
+)
+
 db.commit()

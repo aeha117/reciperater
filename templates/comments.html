@@ -1,0 +1,228 @@
+<!-- This file is used to test comments and replies, and will be removed in the final product -->
+[[extend 'layout.html']]
+
+<style>
+[v-cloak] {
+     display: none;
+}
+</style>
+
+
+<div class="section" id="vue-target" v-cloak>
+  <!-- Put here your Vue.js template -->
+  <h1 class="title">Comment Testing</h1>
+
+
+  <!-- Enables the user to add a comment -->
+  <button v-if="!add_comment_mode" @click="set_add_comment_mode(true)" class="button is-primary">
+    <span class="icon"><i class ="fa fa-plus fa-fw"></i></span>
+  </button>
+  <div v-if="add_comment_mode" class="container block">
+    <div class="field">
+      <div class="control">
+        <textarea class="textarea" placeholder="Make a comment!" v-model="comment_content"></textarea>
+      </div>
+    </div>
+    <div class="field">
+      <div class="control">
+        <input v-if="comment_content.length > 0" type="submit" @click="add_comment()" value="Post" class="button is-primary">
+        <input v-else type="submit" value="Post" class="button has-background-grey-light">
+        <input type="submit" @click="set_add_comment_mode(false); reset_comment_form();" value="Cancel" class="button is-warning">
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Spacer for styling -->
+  <div class="block"></div>
+
+
+  <!-- Renders the comments onto the page -->
+  <div v-for="c in comment_rows.slice().reverse()">
+
+    <!-- Box that contains the comment and its corresponding buttons/functionality -->
+    <div class="box has-background-white-ter">
+
+      <!-- Displays the user's comment and enables the user to edit their comment -->
+      <div class="block has-text-black">
+        <h1 v-if="!c.edit_mode" class="has-text-black">{{c.comment_content}}</h1>
+        <div v-else>
+          <textarea class="textarea" placeholder="Edit your comment!" v-model="c.temp_comment_content">{{c.comment_content}}</textarea>
+          <div class="block"></div>
+          <input v-if="c.comment_content == c.temp_comment_content || c.temp_comment_content.length == 0" type="submit" value="Submit" class="button has-background-grey-light">
+          <input v-else @click="set_comment_edit_mode(c._idx, false); edit_comment(c._idx, c.temp_comment_content);" type="submit" value="Submit" class="button is-primary">
+          <input @click="set_comment_edit_mode(c._idx, false); reset_temp_comment_content(c._idx)" type="submit" value="Cancel" class="button is-warning">
+        </div>
+        <div class="block"></div>
+        <h1 class="has-text-grey-dark">{{c.name}}</h1>
+      </div>
+
+
+      <!-- Spacer for styling -->
+      <div class="block"></div>
+
+
+      <!-- Columns that contain buttons (Upvote, Downvote, Edit, Delete, Reply) -->
+      <div class="columns">
+
+        <!-- Enables the user to upvote or downvote a comment -->
+        <!-- Displays the count (upvotes - downvotes) to the screen -->
+        <div class="column is-four-fifths">
+          <button v-if="c.liked" class="button is-success" @click="unlike_comment(c._idx)">
+            <i class="fa fa-plus" aria-hidden="true"></i>
+          </button>
+          <button v-else class="button" @click="like_comment(c._idx);">
+            <i class="fa fa-plus" aria-hidden="true"></i>
+          </button>
+          <span v-if="c.count > 0" class="mx-4 mt-1 has-text-success">{{c.count}}</span>
+          <span v-if="c.count < 0" class="mx-4 mt-1 has-text-danger">{{c.count}}</span>
+          <span v-if="c.count == 0" class="mx-4 mt-1">{{c.count}}</span>
+          <button v-if="c.disliked" class="button is-danger" @click="undislike_comment(c._idx)">
+            <i class="fa fa-minus" aria-hidden="true"></i>
+          </button>
+          <button v-else class="button" @click="dislike_comment(c._idx)">
+            <i class="fa fa-minus" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        
+        <!-- Button that enables the user to edit their comment -->
+        <div v-if="c.user_email == user_email" class="column">
+          <button @click="set_comment_edit_mode(c._idx, true)" class="button is-warning">
+            <i class ="fa fa-fw fa-pencil"></i>
+          </button>
+        </div>
+        <div v-else class="column"></div>
+
+
+        <!-- Button that enables the user to delete their comment -->
+        <div v-if="c.user_email == user_email" class="column">
+          <button @click="delete_comment(c._idx)" class="button is-danger">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+        <div v-else class="column"></div>
+
+        <!-- Button that enables the user to reply to a comment -->
+        <div class="column">
+          <button @click="set_reply_mode(c._idx, true)" class="button has-background-info">
+            <i class="fa fa-reply" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Enables users to view/hide a comment's replies -->
+      <div v-if="c.num_replies > 0" class="columns">
+        <div class="column is-four-fifths"></div>
+        <div class="column">
+          <div class="columns">
+            <div class="column is-one-third"></div>
+            <div class="column">
+              <button v-if="!c.show_replies" @click="set_show_replies(c._idx, true)" class="button">
+                <i class="fa fa-caret-down mr-2" aria-hidden="true"></i>
+                <h1 v-if="c.num_replies == 1">View {{c.num_replies}} reply</h1>
+                <h1 v-else>View {{c.num_replies}} replies</h1>
+              </button>
+              <button v-else @click="set_show_replies(c._idx, false)" class="button">
+                <i class="fa fa-caret-up mr-2" aria-hidden="true"></i>
+                <h1 v-if="c.num_replies == 1">Hide {{c.num_replies}} reply</h1>
+                <h1 v-else>Hide {{c.num_replies}} replies</h1>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enables a user to reply to a comment -->
+      <div v-if="c.reply_mode" class="container block">
+        <div class="field">
+          <div class="control">
+            <textarea class="textarea" placeholder="Make a reply!" v-model="c.reply_content"></textarea>
+          </div>
+        </div>
+        <div class="field">
+          <div class="control">
+            <input v-if="c.reply_content.length > 0" type="submit" @click="add_reply(c._idx); set_show_replies(c._idx, true);" value="Submit" class="button is-primary">
+            <input v-else type="submit" value="Submit" class="button has-background-grey-light">
+            <input type="submit" @click="set_reply_mode(c._idx, false); reset_reply_form(c._idx);" value="Cancel" class="button is-warning">
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Spacer for styling -->
+    <div class="block"></div>
+
+
+    <!-- If the user enabled viewing a comment's replies, then those replies are rendered -->
+    <div v-if="c.show_replies" v-for="r in reply_rows.slice().reverse()">
+      <div v-if="c.id == r.comment_id" class="columns">
+
+        <!-- Spacer for styling -->
+        <div class="column is-one-quarter"></div>
+
+        <!-- Box that contains the reply and its corresponding buttons/functionality -->
+        <div class="column box has-background-grey-lighter">
+          <div class="columns">
+
+            <!-- Displays the user's reply and enables the user to edit their reply -->
+            <div class="column is-four-fifths">
+              <h1 v-if="!r.edit_mode" class="has-text-black">{{r.reply_content}}</h1>
+              <div v-else>
+                <textarea class="textarea" placeholder="Edit your reply!" v-model="r.temp_reply_content">{{r.reply_content}}</textarea>
+                <div class="block"></div>
+                <input v-if="r.reply_content == r.temp_reply_content || r.temp_reply_content.length == 0" type="submit" value="Submit" class="button has-background-grey-light">
+                <input v-else @click="set_reply_edit_mode(r._idx, false); edit_reply(r._idx, r.temp_reply_content);" type="submit" value="Submit" class="button is-primary">
+                <input @click="set_reply_edit_mode(r._idx, false); reset_temp_reply_content(r._idx);" type="submit" value="Cancel" class="button is-warning">
+              </div>
+              <div class="block"></div>
+              <h1 class="has-text-grey-dark">{{r.name}}</h1>
+            </div>
+
+            <!-- Button that enables a user to edit their reply -->
+            <div class="column">
+              <button v-if="r.user_email == user_email" @click="set_reply_edit_mode(r._idx, true)" class="button is-warning">
+                <i class="fa fa-fw fa-pencil"></i>
+              </button>
+            </div>
+
+            <!-- Button that enables a user to delete their reply-->
+            <div class="column">
+              <button v-if="r.user_email == user_email" @click="delete_reply(r._idx)" class="button is-danger">
+                <i class="fa fa-trash"></i>
+              </button>
+            </div>
+          </div>      
+        </div>
+
+        <!-- Spacer for styling -->
+        <div class="block"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+[[block page_scripts]]
+<!-- Loads the index-specific js for Vue -->
+<script>
+  let my_callback_url = "[[=XML(my_callback_url)]]";
+  let get_name_url = "[[=XML(get_name_url)]]";
+  let get_user_email_url = "[[=XML(get_user_email_url)]]";
+  let load_comments_url = "[[=XML(load_comments_url)]]";
+  let add_comment_url = "[[=XML(add_comment_url)]]";
+  let delete_comment_url = "[[=XML(delete_comment_url)]]";
+  let edit_comment_url = "[[=XML(edit_comment_url)]]";
+  let add_liker_url = "[[=XML(add_liker_url)]]";
+  let remove_liker_url = "[[=XML(remove_liker_url)]]";
+  let add_disliker_url = "[[=XML(add_disliker_url)]]";
+  let remove_disliker_url = "[[=XML(remove_disliker_url)]]";
+  let load_replies_url = "[[=XML(load_replies_url)]]";
+  let add_reply_url = "[[=XML(add_reply_url)]]";
+  let delete_reply_url = "[[=XML(delete_reply_url)]]";
+  let edit_reply_url = "[[=XML(edit_reply_url)]]";
+</script>
+<script src="js/comments.js"></script>
+
+[[end]]
