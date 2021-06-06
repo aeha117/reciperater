@@ -12,6 +12,7 @@
     
    <div class="box has-background-light	">
 
+    <!-- Enables a user to enter the name of their recipe -->
     <div class="block">
         <div class="columns">
             <div class="column is-one-third">
@@ -25,11 +26,13 @@
         </div>   
     </div>
    
+    <!-- Enables a user to enter instructions for their recipe -->
     <div class="block">
         <p><b>Instructions: </b>  </p>
         <textarea class="textarea" placeholder="Provide instructions to prepare your recipe." v-model="instructions"></textarea>
     </div>
 
+    <!-- Enables a user to enter ingredients for their recipe -->
     <div class="block">
         <div class="columns">
             <div class="column is-three-fifths">
@@ -41,17 +44,20 @@
                                 <input class="input" type="text" placeholder="List an ingredient." v-model="curr_ingredient">
                             </div>
                             
+                            <!-- Enables a user to enter a quantity for their ingredient and displays that quantity -->
                             <div class="column">
                                 <button class="button" @click="inc_curr_quantity()">
                                     <span class="icon"><i class="fa fa-arrow-up" aria-hidden="true"></i></span>
                                 </button>
                                 <span class="mx-4 mt-1">{{curr_quantity}}</span>
                                 <button class="button" @click="dec_curr_quantity()">    
-                                    <span class="icon"><i class="fa fa-arrow-down" aria-hidden="true"></i>                                    </span>
+                                    <span class="icon"><i class="fa fa-arrow-down" aria-hidden="true"></i></span>
                                 </button>
                             </div>
                            
+                            <!-- Button to add an ingredient to the list -->
                             <div class="column">
+                                <!-- If an ingredient is entered, with an amount greater than 0, allow the user to enter the ingredient -->
                                 <button v-if="curr_ingredient.length == 0 || curr_quantity == 0" class="button has-background-grey-light">
                                     <span class="icon"><i class ="fa fa-plus fa-fw"></i></span>
                                 </button>
@@ -60,19 +66,19 @@
                                 </button>
                             </div>
                         </div>
+                        <!-- Displays the user's ingredient list -->
                         <div class="columns">
                             <div class="column">
                                 <div v-for="i in ingredients">
                                     <div class="columns">
-                                        <div class="column">
+                                        <div class="column is-four-fifths">
                                             <p>{{i._idx + 1}}) {{i.ingredient}} ({{i.quantity}})</p>
                                         </div>
                                         <div class="column">
                                              <button class="delete" @click=delete_ingredient(i._idx)></button>
                                         </div>       
                                     </div>
-                                </div>       
-                                <!-- <input class="input" type="text" value="{{i}}" readonly> -->   
+                                </div>        
                             </div>
                             <div class="column"></div>
                         </div>
@@ -82,6 +88,7 @@
         </div>   
     </div>
 
+    <!-- Enables the user to enter the estimated time for their recipe -->
     <div class="block">
         <div class="columns">
             <div class="column is-one-quarter">
@@ -95,9 +102,10 @@
         </div>   
     </div>
 
+    <!-- Enables the user to set tags for their recipe -->
     <div class="block">
         <div class="columns">
-            <div class="column is-one-quarter">
+            <div class="column is-half">
                 <div class="columns is-gapless">
                     <div class="column">
                         <p><b>Tags: </b> </p>
@@ -107,6 +115,35 @@
                         <button v-else class="button is-success" @click="set_lunch(false)">Lunch</button>
                         <button v-if="!is_dinner" class="button" @click="set_dinner(true)">Dinner</button>
                         <button v-else class="button is-success" @click="set_dinner(false)">Dinner</button>
+                        <div class="columns mt-1">
+                            <div class="column">
+                                <input class="input" type="text" placeholder="Enter a tag." v-model="curr_tag"> 
+                            </div>
+                            <div class="column">
+                                <button v-if="curr_tag.length == 0" class="button has-background-grey-light">
+                                    <span class="icon"><i class ="fa fa-plus fa-fw"></i></span>
+                                </button>
+                                <button v-else class="button is-primary" @click="add_tag()">
+                                    <span class="icon"><i class ="fa fa-plus fa-fw"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Displays the user's tag list -->
+                        <div class="columns">
+                            <div class="column">
+                                <div v-for="t in tags">
+                                    <div class="columns">
+                                        <div class="column is-four-fifths">
+                                            <p>{{t._idx + 1}}) {{t.tag}}</p>
+                                        </div>
+                                        <div class="column">
+                                             <button class="delete" @click=delete_tag(t._idx)></button>
+                                        </div>       
+                                    </div>
+                                </div>        
+                            </div>
+                            <div class="column"></div>
+                        </div>
                     </div>
                 </div>
             </div>    
@@ -114,10 +151,12 @@
     </div>
 
     
+    <!-- Enables a user to submit or cancel their recipe-->
     <div class="columns">
         <div class="column is-four-fifths"></div>
         <div class="column">
             <div class="columns is-gapless">
+                <!-- If all the fields are filled out appropriately, allow the user to submit their recipe -->
                 <div v-if="recipe_name.length > 0 && instructions.length > 0 && 
                     ingredients.length > 0 && estimated_time.length > 0 && 
                     (is_breakfast || is_lunch || is_dinner)" class="column">

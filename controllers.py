@@ -41,8 +41,6 @@ def index():
         my_callback_url = URL('my_callback', signer=url_signer),
     )
 
-
-
 ################################# Controller functions for Recipe Display #################################
 
 @action('display')
@@ -80,14 +78,12 @@ def add_recipe():
     for t in tag_list:
         db.tags.insert(
             recipe_id=id,
-            tag_name=t,
+            tag_name=t["tag"],
         )
 
     return dict(id=id)
 
-
 #################################### End of Recipe Display Controllers  ####################################
-
 
 
 

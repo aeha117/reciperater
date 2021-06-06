@@ -18,6 +18,8 @@ let init = (app) => {
         curr_quantity: 0,
         ingredients: [],
         estimated_time: "",
+        curr_tag: "",
+        tags: [],
         is_breakfast: false,
         is_lunch: false,
         is_dinner: false,
@@ -30,6 +32,7 @@ let init = (app) => {
         return a;
     };
 
+    // Resets the form after the user submits their recipe.
     app.reset_form = function () {
         app.vue.recipe_name = "";
         app.vue.instructions = "";
@@ -37,11 +40,14 @@ let init = (app) => {
         app.vue.curr_quantity = 0;
         app.vue.ingredients = [];
         app.vue.estimated_time = "";
+        app.vue.curr_tag = "";
+        app.vue.tags = [];
         app.vue.is_breakfast = false;
         app.vue.is_lunch = false;
         app.vue.is_dinner = false;
     }
 
+    /* Setters used to update the tag flags (is_breakfast, is_lunch, is_dinner) */
     app.set_breakfast = function (new_mode) {
         app.vue.is_breakfast = new_mode;
     };
@@ -51,6 +57,8 @@ let init = (app) => {
     app.set_dinner = function (new_mode) {
         app.vue.is_dinner = new_mode;
     };
+
+    /* Updates the quantity. Increments/Decrements it when the user uses the buttons */
     app.inc_curr_quantity = function () {
         app.vue.curr_quantity += 1;
     }
@@ -60,6 +68,8 @@ let init = (app) => {
         }
     }
 
+    // Adds an ingredient to the list of ingredients.
+    // Once the recipe is submitted, this list will be sent to the db.
     app.add_ingredient = function () {
         app.vue.ingredients.push({
             ingredient: app.vue.curr_ingredient,
@@ -70,26 +80,41 @@ let init = (app) => {
         app.vue.curr_quantity = 0;
     }
 
+    // Adds a tag to the list of tags.
+    // Once the recipe is submitted, this list will be sent to the db.
+    app.add_tag = function () {
+        app.vue.tags.push({tag: app.vue.curr_tag});
+        app.enumerate(app.vue.tags);
+        app.vue.curr_tag = "";
+    }
+
+    // Adds a recipe to the database.
     app.add_recipe = function () {
-        tags = []
-        if (app.vue.is_breakfast == true) { tags.push("Breakfast"); }
-        if (app.vue.is_lunch == true) {tags.push("Lunch"); }
-        if (app.vue.is_dinner == true) {tags.push("Dinner"); }
+        if (app.vue.is_breakfast == true) { app.vue.tags.push({tag: "Breakfast"}); }
+        if (app.vue.is_lunch == true) {app.vue.tags.push({tag: "Lunch"}); }
+        if (app.vue.is_dinner == true) {app.vue.tags.push({tag: "Dinner"}); }
         axios.post(add_recipe_url,
             {
                 recipe_name: app.vue.recipe_name,
                 recipe_time: app.vue.estimated_time,
                 recipe_content: app.vue.instructions,
                 ingredients: app.vue.ingredients,
-                tags: tags,
+                tags: app.vue.tags,
             }).then(function (response) {
                 app.reset_form();
         });
     }
 
+    // Deletes an ingredient from the local list of ingredients.
     app.delete_ingredient = function (row_idx) {
         app.vue.ingredients.splice(row_idx, 1);
         app.enumerate(app.vue.ingredients);
+    }
+
+    // Deletes a tag from the local list of tags.
+    app.delete_tag = function (row_idx) {
+        app.vue.tags.splice(row_idx, 1);
+        app.enumerate(app.vue.tags);
     }
 
     // This contains all the methods.
@@ -100,8 +125,10 @@ let init = (app) => {
         set_lunch: app.set_lunch,
         set_dinner: app.set_dinner,
         add_ingredient: app.add_ingredient,
+        add_tag: app.add_tag,
         add_recipe: app.add_recipe,
         delete_ingredient: app.delete_ingredient,
+        delete_tag: app.delete_tag,
         inc_curr_quantity: app.inc_curr_quantity,
         dec_curr_quantity: app.dec_curr_quantity,
     };
