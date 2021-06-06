@@ -41,6 +41,56 @@ def index():
         my_callback_url = URL('my_callback', signer=url_signer),
     )
 
+
+
+################################# Controller functions for Recipe Display #################################
+
+@action('display')
+@action.uses(db, auth, auth.user, 'display.html')
+def display():
+    return dict(
+        # COMPLETE: return here any signed URLs you need.
+        my_callback_url = URL('my_callback', signer=url_signer),
+        get_name_url = URL('get_name', signer=url_signer),
+        get_user_email_url = URL('get_user_email', signer=url_signer),
+        add_recipe_url = URL('add_recipe', signer=url_signer),
+    )
+
+# Adds a user's recipe to the database.
+@action('add_recipe', method="POST")
+@action.uses(url_signer.verify(), db)
+def add_recipe():
+    id = db.recipe.insert(
+        recipe_name=request.json.get('recipe_name'),
+        recipe_time=request.json.get('recipe_time'),
+        recipe_content=request.json.get('recipe_content'),
+        likers=[],
+        dislikers=[],
+    )
+
+    ingredient_list = request.json.get('ingredients')
+    for i in ingredient_list:
+        db.ingredients.insert(
+            recipe_id=id,
+            ingredient_name=i["ingredient"],
+            ingredient_amount=i["quantity"],
+        )
+
+    tag_list = request.json.get('tags')
+    for t in tag_list:
+        db.tags.insert(
+            recipe_id=id,
+            tag_name=t,
+        )
+
+    return dict(id=id)
+
+
+#################################### End of Recipe Display Controllers  ####################################
+
+
+
+
 ################################# Controller functions for Comments and Replies #################################
 
 @action('comments')

@@ -26,8 +26,8 @@ db.define_table(
     Field('recipe_time'),
     Field('recipe_content', 'text', requires=IS_NOT_EMPTY()),
     Field('user_email', default=get_user_email),
-    Field('recipe_likes', 'integer', requires=IS_INT_IN_RANGE(0, 1e10)),
-    Field('recipe_dislikes', 'integer', requires=IS_INT_IN_RANGE(0, 1e10)),
+    Field('likers', type='list:string'), 
+    Field('dislikers', type='list:string'),
     Field('date_created', 'datetime', default=get_time),
 )
 

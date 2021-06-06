@@ -1,0 +1,151 @@
+[[extend 'layout.html']]
+
+<style>
+[v-cloak] {
+     display: none;
+}
+</style>
+
+
+<div class="section" id="vue-target" v-cloak>
+  <!-- Put here your Vue.js template -->
+    
+   <div class="box has-background-light	">
+
+    <div class="block">
+        <div class="columns">
+            <div class="column is-one-third">
+                <div class="columns is-gapless">
+                    <div class="column">
+                        <p><b>Recipe Name: </b>  </p>
+                        <input class="input" type="text" placeholder="Enter the name of your recipe." v-model="recipe_name">  
+                    </div>
+                </div>
+            </div>    
+        </div>   
+    </div>
+   
+    <div class="block">
+        <p><b>Instructions: </b>  </p>
+        <textarea class="textarea" placeholder="Provide instructions to prepare your recipe." v-model="instructions"></textarea>
+    </div>
+
+    <div class="block">
+        <div class="columns">
+            <div class="column is-three-fifths">
+                <div class="columns is-gapless">
+                    <div class="column">
+                        <p><b>Ingredients: </b> </p>
+                        <div class="columns">
+                            <div class="column is-half">
+                                <input class="input" type="text" placeholder="List an ingredient." v-model="curr_ingredient">
+                            </div>
+                            
+                            <div class="column">
+                                <button class="button" @click="inc_curr_quantity()">
+                                    <span class="icon"><i class="fa fa-arrow-up" aria-hidden="true"></i></span>
+                                </button>
+                                <span class="mx-4 mt-1">{{curr_quantity}}</span>
+                                <button class="button" @click="dec_curr_quantity()">    
+                                    <span class="icon"><i class="fa fa-arrow-down" aria-hidden="true"></i>                                    </span>
+                                </button>
+                            </div>
+                           
+                            <div class="column">
+                                <button v-if="curr_ingredient.length == 0 || curr_quantity == 0" class="button has-background-grey-light">
+                                    <span class="icon"><i class ="fa fa-plus fa-fw"></i></span>
+                                </button>
+                                <button v-else class="button is-primary" @click="add_ingredient()">
+                                    <span class="icon"><i class ="fa fa-plus fa-fw"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="columns">
+                            <div class="column">
+                                <div v-for="i in ingredients">
+                                    <div class="columns">
+                                        <div class="column">
+                                            <p>{{i._idx + 1}}) {{i.ingredient}} ({{i.quantity}})</p>
+                                        </div>
+                                        <div class="column">
+                                             <button class="delete" @click=delete_ingredient(i._idx)></button>
+                                        </div>       
+                                    </div>
+                                </div>       
+                                <!-- <input class="input" type="text" value="{{i}}" readonly> -->   
+                            </div>
+                            <div class="column"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>    
+        </div>   
+    </div>
+
+    <div class="block">
+        <div class="columns">
+            <div class="column is-one-quarter">
+                <div class="columns is-gapless">
+                    <div class="column">
+                        <p><b>Estimated time: </b> </p>
+                        <input class="input" type="text" placeholder="Enter the estimated time." v-model="estimated_time">
+                    </div>
+                </div>
+            </div>    
+        </div>   
+    </div>
+
+    <div class="block">
+        <div class="columns">
+            <div class="column is-one-quarter">
+                <div class="columns is-gapless">
+                    <div class="column">
+                        <p><b>Tags: </b> </p>
+                        <button v-if="!is_breakfast" class="button" @click="set_breakfast(true)">Breakfast</button>
+                        <button v-else class="button is-success" @click="set_breakfast(false)">Breakfast</button>
+                        <button v-if="!is_lunch" class="button" @click="set_lunch(true)">Lunch</button>
+                        <button v-else class="button is-success" @click="set_lunch(false)">Lunch</button>
+                        <button v-if="!is_dinner" class="button" @click="set_dinner(true)">Dinner</button>
+                        <button v-else class="button is-success" @click="set_dinner(false)">Dinner</button>
+                    </div>
+                </div>
+            </div>    
+        </div>   
+    </div>
+
+    
+    <div class="columns">
+        <div class="column is-four-fifths"></div>
+        <div class="column">
+            <div class="columns is-gapless">
+                <div v-if="recipe_name.length > 0 && instructions.length > 0 && 
+                    ingredients.length > 0 && estimated_time.length > 0 && 
+                    (is_breakfast || is_lunch || is_dinner)" class="column">
+                    <button class="button is-primary" @click=add_recipe()>Submit</button>
+                </div>
+                <div v-else class="column">
+                    <button class="button has-background-grey-light">Submit</button>
+                </div>
+                <div class="column">
+                    <button class="button is-warning">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+   </div>
+    
+</div>
+
+
+[[block page_scripts]]
+<!-- Loads the index-specific js for Vue -->
+<script>
+  let my_callback_url = "[[=XML(my_callback_url)]]";
+  let get_name_url = "[[=XML(get_name_url)]]";
+  let get_user_email_url = "[[=XML(get_user_email_url)]]";
+  let add_recipe_url = "[[=XML(add_recipe_url)]]";
+</script>
+<script src="js/display.js"></script>
+[[end]]
