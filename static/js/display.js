@@ -23,6 +23,7 @@ let init = (app) => {
         is_breakfast: false,
         is_lunch: false,
         is_dinner: false,
+        thumbnail: "",
     };
 
     app.enumerate = (a) => {
@@ -45,6 +46,11 @@ let init = (app) => {
         app.vue.is_breakfast = false;
         app.vue.is_lunch = false;
         app.vue.is_dinner = false;
+        app.vue.thumbnail = "";
+    }
+
+    app.reset_thumbnail = function () {
+        app.vue.thumbnail = ""
     }
 
     /* Setters used to update the tag flags (is_breakfast, is_lunch, is_dinner) */
@@ -117,10 +123,25 @@ let init = (app) => {
         app.enumerate(app.vue.tags);
     }
 
+    // Uploads the image of the recipe onto the screen.
+    app.upload_image = function (event) {
+        let input = event.target;
+        let file = input.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.addEventListener("load", function () {
+                // Sends the image to the server.
+                app.vue.thumbnail = reader.result
+            });
+            reader.readAsDataURL(file);
+        }
+    };
+
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.
         reset_form: app.reset_form,
+        reset_thumbnail: app.reset_thumbnail,
         set_breakfast: app.set_breakfast,
         set_lunch: app.set_lunch,
         set_dinner: app.set_dinner,
@@ -131,6 +152,7 @@ let init = (app) => {
         delete_tag: app.delete_tag,
         inc_curr_quantity: app.inc_curr_quantity,
         dec_curr_quantity: app.dec_curr_quantity,
+        upload_image: app.upload_image,
     };
 
     // This creates the Vue instance.

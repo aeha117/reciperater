@@ -151,9 +151,34 @@
     </div>
 
     
+    <div class="columns">
+        <div class="column">
+            <div v-if="!thumbnail">
+                <p class="control">
+                  <div class="file is-info">
+                    <label class="file-label">
+                      <input class="file-input" type="file"
+                             accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
+                             @change="upload_image($event)">
+                      <span class="file-cta">
+                        <span class="file-label">
+                          <span><i class="fa fa-upload"></i></span>
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                </p>
+            </div>
+            <div v-if="thumbnail">
+                <img width="150" :src="thumbnail" />
+                <button class="delete" @click="reset_thumbnail()"></button>
+            </div>  
+        </div>
+    </div>
     <!-- Enables a user to submit or cancel their recipe-->
     <div class="columns">
-        <div class="column is-four-fifths"></div>
+        <div class="column is-four-fifths">
+        </div>
         <div class="column">
             <div class="columns is-gapless">
                 <!-- If all the fields are filled out appropriately, allow the user to submit their recipe -->
