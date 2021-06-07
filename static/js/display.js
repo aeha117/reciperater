@@ -160,7 +160,16 @@ let init = (app) => {
             let reader = new FileReader();
             reader.addEventListener("load", function () {
                 // Sends the image to the server.
-                app.vue.thumbnail = reader.result
+                axios.post(upload_thumbnail_url,
+                    {
+                        recipe_id: recipe.id,
+                        thumbnail: reader.result,
+                    })
+                    .then(function () {
+                        // Sets the local preview.
+                        row.thumbnail = reader.result;
+
+                    });
             });
             reader.readAsDataURL(file);
         }
