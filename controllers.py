@@ -83,6 +83,14 @@ def add_recipe():
 
     return dict(id=id)
 
+@action('delete_recipe')
+@action.uses(url_signer.verify(), db)
+def delete_recipe():
+    id = request.params.get('id')
+    assert id is not None
+    db(db.recipe.id == id).delete()
+    return "ok"
+
 #################################### End of Recipe Display Controllers  ####################################
 
 
