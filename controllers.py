@@ -52,6 +52,7 @@ def display():
         get_name_url = URL('get_name', signer=url_signer),
         get_user_email_url = URL('get_user_email', signer=url_signer),
         add_recipe_url = URL('add_recipe', signer=url_signer),
+        delete_recipe_url = URL('delete_recipe', signer=url_signer),
     )
 
 # Adds a user's recipe to the database.
