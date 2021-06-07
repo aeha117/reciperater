@@ -10,6 +10,9 @@ from pydal.validators import *
 def get_user_email():
     return auth.current_user.get('email') if auth.current_user else None
 
+def get_user():
+    return auth.current_user.get('id') if auth.current_user else None
+
 def get_time():
     return datetime.datetime.utcnow()
 
@@ -39,9 +42,7 @@ db.define_table(
 
 db.define_table(
     'ingredients',
-    Field('ingredient_name', requires=IS_NOT_EMPTY()),
-    Field('ingredient_amount', 'double'),
-    Field('ingredient_unit'),
+    Field('ingredient', requires=IS_NOT_EMPTY()),
     Field('recipe_id', 'reference recipe'),
 )
 

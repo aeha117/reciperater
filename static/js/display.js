@@ -29,7 +29,9 @@ let init = (app) => {
     app.enumerate = (a) => {
         // This adds an _idx field to each element of the array.
         let k = 0;
-        a.map((e) => {e._idx = k++;});
+        a.map((e) => {
+            e._idx = k++;
+        });
         return a;
     };
 
@@ -96,9 +98,15 @@ let init = (app) => {
 
     // Adds a recipe to the database.
     app.add_recipe = function () {
-        if (app.vue.is_breakfast == true) { app.vue.tags.push({tag: "Breakfast"}); }
-        if (app.vue.is_lunch == true) {app.vue.tags.push({tag: "Lunch"}); }
-        if (app.vue.is_dinner == true) {app.vue.tags.push({tag: "Dinner"}); }
+        if (app.vue.is_breakfast === true) {
+            app.vue.tags.push({tag: "Breakfast"});
+        }
+        if (app.vue.is_lunch === true) {
+            app.vue.tags.push({tag: "Lunch"});
+        }
+        if (app.vue.is_dinner === true) {
+            app.vue.tags.push({tag: "Dinner"});
+        }
         axios.post(add_recipe_url,
             {
                 recipe_name: app.vue.recipe_name,
@@ -107,7 +115,7 @@ let init = (app) => {
                 ingredients: app.vue.ingredients,
                 tags: app.vue.tags,
             }).then(function (response) {
-                app.reset_form();
+            app.reset_form();
         });
     }
 
@@ -136,6 +144,12 @@ let init = (app) => {
             reader.readAsDataURL(file);
         }
     };
+
+    app.load_recipe = function () {
+        app.vue.recipe_name = recipe.recipe_name
+        app.vue.instructions = recipe.recipe_content
+        app.vue.estimated_time = recipe.recipe_time
+    }
 
     // This contains all the methods.
     app.methods = {
@@ -166,6 +180,7 @@ let init = (app) => {
     app.init = () => {
         // Put here any initialization code.
         // Typically this is a server GET call to load the data.
+        app.load_recipe()
     };
 
     // Call to the initializer.

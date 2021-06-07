@@ -24,35 +24,99 @@ The path follows the bottlepy syntax.
 session, db, T, auth, and tempates are examples of Fixtures.
 Warning: Fixtures MUST be declared with @action.uses({fixtures}) else your app will result in undefined behavior
 """
+import json
 
+import apps.reciperater.models
 from py4web import action, request, abort, redirect, URL
 from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
-from .models import get_user_email
+from .models import get_user_email, get_user
 
 url_signer = URLSigner(session)
-    
+
+
+# Controllers for display and search of recipes #
 @action('index')
-@action.uses(db, auth, auth.user, 'index.html')
+@action.uses(db, auth.user, 'index.html')
 def index():
+    user_email = get_user_email()
     return dict(
         # COMPLETE: return here any signed URLs you need.
-        my_callback_url = URL('my_callback', signer=url_signer),
+        user_email=user_email,
+        get_recipes_url=URL('get_recipes', signer=url_signer),
+        get_tags_url=URL('get_tags', signer=url_signer),
+        display_base_url=URL('display'),
     )
+
+
+@action('get_recipes')
+@action.uses(db, url_signer.verify())
+def get_recipes():
+    search_terms = request.params.get('search_terms').split('+')
+    search_tags = request.params.get('search_tags').split('+')
+    search_users = request.params.get('search_users').split('+')
+    print(search_terms, search_tags, search_users)
+    tags = db(db.tags.tag_name.contains(search_tags)).select(db.tags.recipe_id, distinct=True)
+    print(tags)
+    query = ((db.recipe.recipe_name.contains(search_terms)) |
+             (db.recipe.recipe_content.contains(search_terms)))
+    recipes = db(query).select()
+    filtered_rows = recipes
+    if len(search_tags) > 1 and len(search_tags[0]) > 0:
+        for tag in tags:
+            filtered_rows += recipes.find(lambda recipe: recipe.id == tag.recipe_id)
+    print(filtered_rows.as_list())
+    return dict(
+        recipes=recipes,
+    )
+
+
+@action('get_tags')
+@action.uses(db, url_signer.verify())
+def get_tags():
+    recipe_id = request.params.get('recipe_id')
+    tags = db(db.tags.recipe_id == recipe_id).select().as_list()
+    return dict(
+        tags=tags,
+    )
+
+
+# End display and search controllers #
+
 
 ################################# Controller functions for Recipe Display #################################
-
 @action('display')
-@action.uses(db, auth, auth.user, 'display.html')
 def display():
+    redirect(URL('index'))
+
+
+@action('display/<recipe_id:int>')
+@action.uses(db, auth.user, 'display.html')
+def display_recipe(recipe_id=None):
+    if recipe_id is None:
+        redirect(URL('index'))
+    recipe = db.recipe[recipe_id].as_dict()
+    tags = db(db.tags.recipe_id == recipe_id).select(db.tags.tag_name).as_list()
+    del recipe['date_created']
+    recipe['tags'] = tags
+    recipe_str = json.dumps(recipe)
+    print(recipe_str)
     return dict(
         # COMPLETE: return here any signed URLs you need.
-        my_callback_url = URL('my_callback', signer=url_signer),
-        get_name_url = URL('get_name', signer=url_signer),
-        get_user_email_url = URL('get_user_email', signer=url_signer),
-        add_recipe_url = URL('add_recipe', signer=url_signer),
+        get_name_url=URL('get_name', signer=url_signer),
+        get_user_email_url=URL('get_user_email', signer=url_signer),
+        recipe=recipe_str,
     )
+
+
+@action('add')
+@action.uses(auth.user, db, url_signer.verify())
+def add():
+    return dict(
+        add_recipe_url=URL('add_recipe', signer=url_signer),
+    )
+
 
 # Adds a user's recipe to the database.
 @action('add_recipe', method="POST")
@@ -83,8 +147,8 @@ def add_recipe():
 
     return dict(id=id)
 
-#################################### End of Recipe Display Controllers  ####################################
 
+#################################### End of Recipe Display Controllers  ####################################
 
 
 ################################# Controller functions for Comments and Replies #################################
@@ -94,26 +158,27 @@ def add_recipe():
 def comments():
     return dict(
         # COMPLETE: return here any signed URLs you need.
-        my_callback_url = URL('my_callback', signer=url_signer),
-        get_name_url = URL('get_name', signer=url_signer),
-        get_user_email_url = URL('get_user_email', signer=url_signer),
+        my_callback_url=URL('my_callback', signer=url_signer),
+        get_name_url=URL('get_name', signer=url_signer),
+        get_user_email_url=URL('get_user_email', signer=url_signer),
 
         # Comment URLS
-        load_comments_url = URL('load_comments', signer=url_signer),
-        add_comment_url = URL('add_comment', signer=url_signer),
-        delete_comment_url = URL('delete_comment', signer=url_signer),
-        edit_comment_url = URL('edit_comment', signer=url_signer),
-        add_liker_url = URL('add_liker', signer=url_signer),
-        remove_liker_url = URL('remove_liker', signer=url_signer),
-        add_disliker_url = URL('add_disliker', signer=url_signer),
-        remove_disliker_url = URL('remove_disliker', signer=url_signer),
+        load_comments_url=URL('load_comments', signer=url_signer),
+        add_comment_url=URL('add_comment', signer=url_signer),
+        delete_comment_url=URL('delete_comment', signer=url_signer),
+        edit_comment_url=URL('edit_comment', signer=url_signer),
+        add_liker_url=URL('add_liker', signer=url_signer),
+        remove_liker_url=URL('remove_liker', signer=url_signer),
+        add_disliker_url=URL('add_disliker', signer=url_signer),
+        remove_disliker_url=URL('remove_disliker', signer=url_signer),
 
         # Reply URLS
-        load_replies_url = URL('load_replies', signer=url_signer),
-        add_reply_url = URL('add_reply', signer=url_signer),
-        delete_reply_url = URL('delete_reply', signer=url_signer),
-        edit_reply_url = URL('edit_reply', signer=url_signer),
+        load_replies_url=URL('load_replies', signer=url_signer),
+        add_reply_url=URL('add_reply', signer=url_signer),
+        delete_reply_url=URL('delete_reply', signer=url_signer),
+        edit_reply_url=URL('edit_reply', signer=url_signer),
     )
+
 
 # Gets the user's name
 @action('get_name')
@@ -123,12 +188,14 @@ def get_name():
     name = r.first_name + " " + r.last_name if r is not None else "Unknown"
     return dict(name=name)
 
+
 # Gets the user's email
 @action('get_user_email')
 @action.uses(url_signer.verify(), db)
 def get_user_email_handler():
     user_email = get_user_email()
     return dict(user_email=user_email)
+
 
 # Loads the comments from the database.
 # Used when the app initially opens.
@@ -138,6 +205,7 @@ def load_comments():
     comment_rows = db(db.comments).select().as_list()
     return dict(comment_rows=comment_rows)
 
+
 # Loads the replies from the database.
 # Used when the app initially opens.
 @action('load_replies')
@@ -145,6 +213,7 @@ def load_comments():
 def load_replies():
     reply_rows = db(db.replies).select().as_list()
     return dict(reply_rows=reply_rows)
+
 
 # Adds a user's comment to the database.
 @action('add_comment', method="POST")
@@ -158,6 +227,7 @@ def add_comment():
     )
     return dict(id=id)
 
+
 # Adds a user's reply to the database.
 @action('add_reply', method="POST")
 @action.uses(url_signer.verify(), db)
@@ -169,6 +239,7 @@ def add_reply():
     )
     return dict(id=id)
 
+
 # Deletes a user's comment from the database.
 @action('delete_comment')
 @action.uses(url_signer.verify(), db)
@@ -178,6 +249,7 @@ def delete_comment():
     db(db.comments.id == id).delete()
     return "ok"
 
+
 # Deletes a user's reply to a comment, from the database.
 @action('delete_reply')
 @action.uses(url_signer.verify(), db)
@@ -186,6 +258,7 @@ def delete_reply():
     assert id is not None
     db(db.replies.id == id).delete()
     return "ok"
+
 
 # Edits a user's comment in the database.
 @action('edit_comment')
@@ -198,6 +271,7 @@ def edit_comment():
     db(db.comments.id == id).update(comment_content=new_comment)
     return "ok"
 
+
 # Edits a user's reply in the database.
 @action('edit_reply')
 @action.uses(url_signer.verify(), db)
@@ -209,6 +283,7 @@ def edit_reply():
     db(db.replies.id == id).update(reply_content=new_reply)
     return "ok"
 
+
 # Adds a liker to a comment's list of likers.
 # This is used to keep track of who liked which comment.
 @action('add_liker')
@@ -218,10 +293,11 @@ def add_liker():
     assert id is not None
     user_email = get_user_email()
     row = db(db.comments.id == id).select().as_list()
-    likers=row[0]["likers"]
+    likers = row[0]["likers"]
     if user_email not in likers:
         likers.append(user_email)
     db(db.comments.id == id).update(likers=likers)
+
 
 # Remove a liker from a comment's list of likers.
 # This is used if the user unliked a comment, or disliked it.
@@ -232,10 +308,11 @@ def remove_liker():
     assert id is not None
     user_email = get_user_email()
     row = db(db.comments.id == id).select().as_list()
-    likers=row[0]["likers"]
+    likers = row[0]["likers"]
     if user_email in likers:
         likers.remove(user_email)
     db(db.comments.id == id).update(likers=likers)
+
 
 # Adds a disliker to a comment's list of dislikers.
 # This is used to keep track of who disliked which comment.
@@ -250,6 +327,7 @@ def add_disliker():
     if user_email not in dislikers:
         dislikers.append(user_email)
     db(db.comments.id == id).update(dislikers=dislikers)
+
 
 # Remove a disliker from a comment's list of dislikers.
 # This is used if the user undisliked a comment, or liked it.
