@@ -50,6 +50,17 @@ def index():
     )
 
 
+@action('upload_thumbnail', method="POST")
+@action.uses(db, auth, auth.user, url_signer.verify(), db)
+def upload_thumbnail():
+    recipe_id = request.json.get("recipe_id")
+    thumbnail = request.json.get("thumbnail")
+    db(db.recipe.id == recipe_id).update(thumbnail=thumbnail)
+    return "ok"
+
+
+################################# Controller functions for Recipe Display #################################
+
 @action('get_recipes')
 @action.uses(db, url_signer.verify())
 def get_recipes():
@@ -147,6 +158,14 @@ def add_recipe():
 
     return dict(id=id)
 
+
+@action('delete_recipe')
+@action.uses(url_signer.verify(), db)
+def delete_recipe():
+    id = request.params.get('id')
+    assert id is not None
+    db(db.recipe.id == id).delete()
+    return "ok"
 
 #################################### End of Recipe Display Controllers  ####################################
 

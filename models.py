@@ -35,6 +35,12 @@ db.define_table(
 )
 
 db.define_table(
+    'image',
+    Field('thumbnail', 'text'),
+    Field('recipe_id', 'reference recipe'),
+)
+
+db.define_table(
     'tags',
     Field('tag_name', requires=IS_NOT_EMPTY()),
     Field('recipe_id', 'reference recipe'),

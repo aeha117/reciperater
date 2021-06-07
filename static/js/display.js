@@ -24,6 +24,7 @@ let init = (app) => {
         is_lunch: false,
         is_dinner: false,
         thumbnail: "",
+        curr_mode: "edit", // Two modes: edit, view
     };
 
     app.enumerate = (a) => {
@@ -57,13 +58,19 @@ let init = (app) => {
 
     /* Setters used to update the tag flags (is_breakfast, is_lunch, is_dinner) */
     app.set_breakfast = function (new_mode) {
-        app.vue.is_breakfast = new_mode;
+        if (app.vue.curr_mode === "edit") {
+            app.vue.is_breakfast = new_mode;
+        }
     };
     app.set_lunch = function (new_mode) {
-        app.vue.is_lunch = new_mode;
+        if (app.vue.curr_mode === "edit") {
+            app.vue.is_lunch = new_mode;
+        }
     };
     app.set_dinner = function (new_mode) {
-        app.vue.is_dinner = new_mode;
+        if (app.vue.curr_mode === "edit") {
+            app.vue.is_dinner = new_mode;
+        }
     };
 
     /* Updates the quantity. Increments/Decrements it when the user uses the buttons */
