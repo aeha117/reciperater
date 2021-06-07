@@ -32,13 +32,10 @@ db.define_table(
     Field('likers', type='list:string'), 
     Field('dislikers', type='list:string'),
     Field('date_created', 'datetime', default=get_time),
+    Field('thumbnail', 'text'),
 )
 
-db.define_table(
-    'image',
-    Field('thumbnail', 'text'),
-    Field('recipe_id', 'reference recipe'),
-)
+
 
 db.define_table(
     'tags',
