@@ -41,6 +41,16 @@ def index():
         my_callback_url = URL('my_callback', signer=url_signer),
     )
 
+
+@action('upload_thumbnail', method="POST")
+@action.uses(db, auth, auth.user, url_signer.verify(), db)
+def upload_thumbnail():
+    recipe_id = request.json.get("recipe_id")
+    thumbnail = request.json.get("thumbnail")
+    db(db.recipe.id == recipe_id).update(thumbnail=thumbnail)
+    return "ok"
+
+
 ################################# Controller functions for Recipe Display #################################
 
 @action('display')
