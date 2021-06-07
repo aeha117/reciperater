@@ -19,7 +19,11 @@
                 <div class="columns is-gapless">
                     <div class="column">
                         <p><b>Recipe Name: </b>  </p>
-                        <input class="input" type="text" placeholder="Enter the name of your recipe." v-model="recipe_name">  
+                        <input class="input" type="text" placeholder="Enter the name of your recipe." v-model="recipe_name" 
+                            :class="{
+                                'is-static': curr_mode === 'view',
+                            }"
+                            :readonly="curr_mode === 'view'"> 
                     </div>
                 </div>
             </div>    
@@ -29,7 +33,10 @@
     <!-- Enables a user to enter instructions for their recipe -->
     <div class="block">
         <p><b>Instructions: </b>  </p>
-        <textarea class="textarea" placeholder="Provide instructions to prepare your recipe." v-model="instructions"></textarea>
+        <textarea class="textarea" placeholder="Provide instructions to prepare your recipe." v-model="instructions"
+                    :readonly="curr_mode === 'view'"
+                    :disabled="curr_mode === 'view'">
+        </textarea>
     </div>
 
     <!-- Enables a user to enter ingredients for their recipe -->
@@ -39,7 +46,7 @@
                 <div class="columns is-gapless">
                     <div class="column">
                         <p><b>Ingredients: </b> </p>
-                        <div class="columns">
+                        <div v-if="curr_mode === 'edit'" class="columns">
                             <div class="column is-half">
                                 <input class="input" type="text" placeholder="List an ingredient." v-model="curr_ingredient">
                             </div>
@@ -95,7 +102,11 @@
                 <div class="columns is-gapless">
                     <div class="column">
                         <p><b>Estimated time: </b> </p>
-                        <input class="input" type="text" placeholder="Enter the estimated time." v-model="estimated_time">
+                        <input class="input" type="text" placeholder="Enter the estimated time." v-model="estimated_time" 
+                                :class="{
+                                    'is-static': curr_mode === 'view',
+                                }"
+                                :readonly="curr_mode === 'view'">
                     </div>
                 </div>
             </div>    
@@ -115,7 +126,7 @@
                         <button v-else class="button is-success" @click="set_lunch(false)">Lunch</button>
                         <button v-if="!is_dinner" class="button" @click="set_dinner(true)">Dinner</button>
                         <button v-else class="button is-success" @click="set_dinner(false)">Dinner</button>
-                        <div class="columns mt-1">
+                        <div v-if="curr_mode === 'edit'" class="columns mt-1">
                             <div class="column">
                                 <input class="input" type="text" placeholder="Enter a tag." v-model="curr_tag"> 
                             </div>
@@ -151,7 +162,7 @@
     </div>
 
     
-    <div class="columns">
+    <div v-if="curr_mode === 'edit'" class="columns">
         <div class="column">
             <div v-if="!thumbnail">
                 <p class="control">
@@ -172,11 +183,11 @@
             <div v-if="thumbnail">
                 <img width="150" :src="thumbnail" />
                 <button class="delete" @click="reset_thumbnail()"></button>
-            </div>  
+            </div>
         </div>
     </div>
     <!-- Enables a user to submit or cancel their recipe-->
-    <div class="columns">
+    <div v-if="curr_mode === 'edit'" class="columns">
         <div class="column is-four-fifths">
         </div>
         <div class="column">
