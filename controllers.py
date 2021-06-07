@@ -118,6 +118,7 @@ def display_recipe(recipe_id=None):
         get_name_url=URL('get_name', signer=url_signer),
         get_user_email_url=URL('get_user_email', signer=url_signer),
         recipe=recipe_str,
+        upload_recipe_url=URL('upload_thumbnail', signer=url_signer),
     )
 
 
