@@ -117,6 +117,20 @@ let init = (app) => {
                 app.reset_form();
         });
     }
+    
+    // Deletes recipe from database
+    app.delete_recipe = function(row_idx) {
+        let id = app.vue.rows[row_idx].id;
+        axios.get(delete_recipe_url, {params: {id: id}}).then(function (response) {
+            for (let i = 0; i < app.vue.rows.length; i++) {
+                if (app.vue.rows[i].id === id) {
+                    app.vue.rows.splice(i, 1);
+                    app.enumerate(app.vue.rows);
+                    break;
+                }
+            }
+            });
+    };
 
     // Deletes an ingredient from the local list of ingredients.
     app.delete_ingredient = function (row_idx) {
@@ -155,6 +169,7 @@ let init = (app) => {
         add_ingredient: app.add_ingredient,
         add_tag: app.add_tag,
         add_recipe: app.add_recipe,
+        delete_recipe: app.delete_recipe,
         delete_ingredient: app.delete_ingredient,
         delete_tag: app.delete_tag,
         inc_curr_quantity: app.inc_curr_quantity,
