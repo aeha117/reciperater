@@ -122,7 +122,8 @@ let init = (app) => {
                 ingredients: app.vue.ingredients,
                 tags: app.vue.tags,
             }).then(function (response) {
-            app.reset_form();
+            //app.reset_form();
+            app.back_to_index();
         });
     }
     
@@ -167,9 +168,9 @@ let init = (app) => {
                     })
                     .then(function () {
                         // Sets the local preview.
-                        row.thumbnail = reader.result;
-
                     });
+                
+                app.vue.thumbnail = reader.result;
             });
             reader.readAsDataURL(file);
         }
@@ -179,6 +180,10 @@ let init = (app) => {
         app.vue.recipe_name = recipe.recipe_name
         app.vue.instructions = recipe.recipe_content
         app.vue.estimated_time = recipe.recipe_time
+    }
+
+    app.back_to_index = function () {
+        window.location = back_to_index_url
     }
 
     // This contains all the methods.
@@ -198,6 +203,7 @@ let init = (app) => {
         inc_curr_quantity: app.inc_curr_quantity,
         dec_curr_quantity: app.dec_curr_quantity,
         upload_image: app.upload_image,
+        back_to_index: app.back_to_index,
     };
 
     // This creates the Vue instance.

@@ -101,6 +101,10 @@ def get_tags():
 def display():
     redirect(URL('index'))
 
+@action('back_to_index')
+def back_to_index():
+    redirect(URL('index'))
+
 
 @action('display/<recipe_id:int>')
 @action.uses(db, auth.user, 'display.html')
@@ -130,7 +134,9 @@ def display_recipe(recipe_id=None):
 @action.uses(auth.user, db, 'display.html')
 def add():
     return dict(
+        upload_thumbnail_url=URL('upload_thumbnail', signer=url_signer),
         add_recipe_url=URL('add_recipe', signer=url_signer),
+        back_to_index_url=URL('back_to_index', signer=url_signer),
         recipe=json.dumps(dict())
     )
 
