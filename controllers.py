@@ -191,7 +191,7 @@ def back_to_index():
 def upload_thumbnail():
     recipe_id = request.json.get("recipe_id")
     thumbnail = request.json.get("thumbnail")
-    db(db.recipe.id == recipe_id).update(thumbnail=thumbnail)
+    db(db.recipe.id == recipe_id).select().first().update_record(thumbnail=thumbnail)
     return "ok"
 
 
