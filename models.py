@@ -35,8 +35,6 @@ db.define_table(
     Field('thumbnail', 'text'),
 )
 
-
-
 db.define_table(
     'tags',
     Field('tag_name', requires=IS_NOT_EMPTY()),

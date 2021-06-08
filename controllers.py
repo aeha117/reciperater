@@ -50,34 +50,32 @@ def index():
     )
 
 
-@action('upload_thumbnail', method="POST")
-@action.uses(db, auth, auth.user, url_signer.verify(), db)
-def upload_thumbnail():
-    recipe_id = request.json.get("recipe_id")
-    thumbnail = request.json.get("thumbnail")
-    db(db.recipe.id == recipe_id).update(thumbnail=thumbnail)
-    return "ok"
-
-
-################################# Controller functions for Recipe Display #################################
-
 @action('get_recipes')
 @action.uses(db, url_signer.verify())
 def get_recipes():
     search_terms = request.params.get('search_terms').split('+')
     search_tags = request.params.get('search_tags').split('+')
     search_users = request.params.get('search_users').split('+')
-    print(search_terms, search_tags, search_users)
-    tags = db(db.tags.tag_name.contains(search_tags)).select(db.tags.recipe_id, distinct=True)
-    print(tags)
-    query = ((db.recipe.recipe_name.contains(search_terms)) |
-             (db.recipe.recipe_content.contains(search_terms)))
-    recipes = db(query).select()
-    filtered_rows = recipes
-    if len(search_tags) > 1 and len(search_tags[0]) > 0:
-        for tag in tags:
-            filtered_rows += recipes.find(lambda recipe: recipe.id == tag.recipe_id)
-    print(filtered_rows.as_list())
+    if search_terms[0] == '' and search_tags[0] == '' and search_users[0] == '':
+        recipes = db(db.recipe).select().as_list()
+    elif search_tags[0] == '' and search_users[0] == '':
+        recipes = db((db.recipe.recipe_name.contains(search_terms)) |
+                     (db.recipe.recipe_content.contains(search_terms))).select().as_list()
+    elif search_users[0] == '':
+        recipes = db(((db.recipe.recipe_name.contains(search_terms)) |
+                      (db.recipe.recipe_content.contains(search_terms))) &
+                     (db.tags.tag_name.contains(search_tags)) &
+                     (db.recipe.id == db.tags.recipe_id)).select(db.recipe.ALL).as_list()
+    elif search_tags[0] == '':
+        recipes = db(((db.recipe.recipe_name.contains(search_terms)) |
+                      (db.recipe.recipe_content.contains(search_terms))) &
+                     (db.recipe.user_email.contains(search_users))).select(db.recipe.ALL).as_list()
+    else:
+        recipes = db(((db.recipe.recipe_name.contains(search_terms)) |
+                      (db.recipe.recipe_content.contains(search_terms))) &
+                     (db.tags.tag_name.contains(search_tags)) &
+                     (db.recipe.id == db.tags.recipe_id) &
+                     (db.recipe.user_email.contains(search_users))).select(db.recipe.ALL).as_list()
     return dict(
         recipes=recipes,
     )
@@ -109,8 +107,10 @@ def display_recipe(recipe_id=None):
         redirect(URL('index'))
     recipe = db.recipe[recipe_id].as_dict()
     tags = db(db.tags.recipe_id == recipe_id).select(db.tags.tag_name).as_list()
+    ingredients = db(db.ingredients.recipe_id == recipe_id).select(db.ingredients.ingredient).as_list()
     del recipe['date_created']
     recipe['tags'] = tags
+    recipe['ingredients'] = ingredients
     recipe_str = json.dumps(recipe)
     print(recipe_str)
     return dict(
@@ -123,10 +123,11 @@ def display_recipe(recipe_id=None):
 
 
 @action('add')
-@action.uses(auth.user, db, url_signer.verify())
+@action.uses(auth.user, db, 'display.html')
 def add():
     return dict(
         add_recipe_url=URL('add_recipe', signer=url_signer),
+        recipe=json.dumps(dict())
     )
 
 
@@ -167,6 +168,16 @@ def delete_recipe():
     assert id is not None
     db(db.recipe.id == id).delete()
     return "ok"
+
+
+@action('upload_thumbnail', method="POST")
+@action.uses(db, auth, auth.user, url_signer.verify(), db)
+def upload_thumbnail():
+    recipe_id = request.json.get("recipe_id")
+    thumbnail = request.json.get("thumbnail")
+    db(db.recipe.id == recipe_id).update(thumbnail=thumbnail)
+    return "ok"
+
 
 #################################### End of Recipe Display Controllers  ####################################
 

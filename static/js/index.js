@@ -27,8 +27,10 @@ let init = (app) => {
     };
 
     app.decorate = (recipes) => {
-        return recipes.map((post) => {
-            post.tags = []
+        return recipes.map((recipe) => {
+            recipe.tags = []
+            recipe.recipe_likes = (recipe.likers === null) ? 0 : recipe.likers.length
+            recipe.recipe_dislikes = (recipe.dislikers === null) ? 0 : recipe.dislikers.length
         })
     }
 
@@ -84,10 +86,15 @@ let init = (app) => {
         app.get_recipes()
     }
 
+    app.clicked_recipe = function (recipe_idx) {
+        window.location = display_base_url + app.vue.recipes[recipe_idx].id
+    }
+
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.
         select_tag: app.select_tag,
+        clicked_recipe: app.clicked_recipe,
     };
 
     // This creates the Vue instance.
