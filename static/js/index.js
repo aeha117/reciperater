@@ -90,11 +90,21 @@ let init = (app) => {
         window.location = display_base_url + app.vue.recipes[recipe_idx].id
     }
 
+    app.add_recipe = function () {
+        window.location = add_recipe_url
+    }
+
+    app.discussion = function () {
+        window.location = discussion_url
+    }
+
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.
         select_tag: app.select_tag,
         clicked_recipe: app.clicked_recipe,
+        add_recipe: app.add_recipe,
+        discussion: app.discussion
     };
 
     // This creates the Vue instance.

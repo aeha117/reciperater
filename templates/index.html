@@ -13,10 +13,13 @@
         <div class="columns">
             <div class="column">
                 <input v-model="searchbar_val" id="search_bar" class="input is-fullwidth"
-                                       placeholder="Filter">
+                       placeholder="Filter">
             </div>
             <div class="column is-narrow">
-                <button class="button is-primary">Add Recipe</button>
+                <div class="level">
+                    <button class="button is-primary" @click="add_recipe()">Add Recipe</button>
+                    <button class="button is-success" @click="discussion()">Discussion</button>
+                </div>
             </div>
         </div>
     </div>
@@ -50,7 +53,8 @@
 
                         <div class="content">
                             {{ recipe.recipe_content.substring(0,150) }}{{ (recipe.recipe_content.length > 150) ? '... ' : ' ' }}
-                            <a v-for="tag in recipe.tags" @click="select_tag(recipe._idx,tag._idx)">#{{ tag.tag_name }} </a>
+                            <a v-for="tag in recipe.tags"
+                               @click="select_tag(recipe._idx,tag._idx)">#{{ tag.tag_name }} </a>
                             <br>
                             <time v-bind:datetime="recipe.date_created">{{ recipe.createdDate.toUTCString() }}</time>
                         </div>
@@ -70,6 +74,8 @@
     let user_email = "[[=XML(user_email)]]";
     let get_recipes_url = "[[=XML(get_recipes_url)]]";
     let get_tags_url = "[[=XML(get_tags_url)]]";
+    let add_recipe_url = "[[=XML(add_recipe_url)]]";
+    let discussion_url = "[[=XML(discussion_url)]]";
     let display_base_url = "[[=XML(display_base_url)]]/";
 </script>
 <script src="js/index.js"></script>

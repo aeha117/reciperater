@@ -47,6 +47,8 @@ def index():
         get_recipes_url=URL('get_recipes', signer=url_signer),
         get_tags_url=URL('get_tags', signer=url_signer),
         display_base_url=URL('display'),
+        add_recipe_url=URL('add'),
+        discussion_url=URL('comments'),
     )
 
 
