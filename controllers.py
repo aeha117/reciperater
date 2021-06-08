@@ -121,6 +121,8 @@ def display_recipe(recipe_id=None):
         get_user_email_url=URL('get_user_email', signer=url_signer),
         recipe=recipe_str,
         upload_thumbnail_url=URL('upload_thumbnail', signer=url_signer),
+        add_recipe_url=URL('add_recipe', signer=url_signer),
+        back_to_index_url=URL('back_to_index', signer=url_signer),
     )
 
 
@@ -170,6 +172,11 @@ def delete_recipe():
     assert id is not None
     db(db.recipe.id == id).delete()
     return "ok"
+    
+@action('back_to_index')
+@action.uses(url_signer.verify(), db)
+def back_to_index():
+    redirect(URL('index'))
 
 
 @action('upload_thumbnail', method="POST")
