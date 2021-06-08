@@ -135,6 +135,7 @@ def display_recipe(recipe_id=None):
 def add():
     return dict(
         upload_thumbnail_url=URL('upload_thumbnail', signer=url_signer),
+        get_user_email_url=URL('get_user_email', signer=url_signer),
         add_recipe_url=URL('add_recipe', signer=url_signer),
         back_to_index_url=URL('back_to_index', signer=url_signer),
         recipe=json.dumps(dict())

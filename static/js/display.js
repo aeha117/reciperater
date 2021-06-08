@@ -177,9 +177,18 @@ let init = (app) => {
     };
 
     app.load_recipe = function () {
+        axios.get(get_user_email_url).then(function (response) {
+            app.vue.user_email = response.data.user_email;
+            console.log(app.vue.user_email);
+            if (recipe.user_email === undefined || recipe.user_email == app.vue.user_email) {
+                app.vue.curr_mode = "edit";
+            } else {
+                app.vue.curr_mode = "view";
+            }
+        });
         app.vue.recipe_name = recipe.recipe_name
         app.vue.instructions = recipe.recipe_content
-        app.vue.estimated_time = recipe.recipe_time
+        app.vue.estimated_time = recipe.recipe_time;
     }
 
     app.back_to_index = function () {
